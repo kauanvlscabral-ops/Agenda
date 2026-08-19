@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Maré · Gestão de Temporada</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script src="shared/finance.js"></script>
+</head>
+<body>
+
+<div id="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-mark"></div>
+      <div class="brand-text">
+        <span class="name">Maré</span>
+        <span class="tag">Gestão de temporada</span>
+      </div>
+    </div>
+    <nav class="nav" id="nav"></nav>
+    <div class="nav-spacer"></div>
+    <div class="nav-item" id="btnSettings" style="margin-bottom:4px;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+      <span>Configurações</span>
+    </div>
+    <div class="theme-toggle" id="themeToggle">
+      <span id="themeLabel">Tema claro</span>
+      <div class="switch"></div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input id="globalSearch" type="text" placeholder="Buscar por nome do hóspede..." />
+      </div>
+      <div class="topbar-spacer"></div>
+      <button class="btn btn-primary" id="btnNewReservation">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>
+        Nova reserva
+      </button>
+    </div>
+
+    <div class="view" id="view"></div>
+  </div>
+</div>
+
+<nav class="bottom-nav" id="bottomNav"></nav>
+
+<div class="overlay" id="formOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="formTitle">Nova reserva</h2>
+      <button class="modal-close" id="closeFormBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <p class="sub">Preencha os dados da reserva. O saldo é calculado automaticamente.</p>
+    <form id="resForm">
+      <div class="form-grid">
+        <div class="field">
+          <label>Nome do locatário</label>
+          <input type="text" id="f_locatario" placeholder="Ex.: João (proprietário)" required />
+        </div>
+        <div class="field">
+          <label>Nome do cliente / hóspede</label>
+          <input type="text" id="f_cliente" placeholder="Ex.: Maria Souza" required />
+        </div>
+        <div class="field">
+          <label>Telefone do hóspede</label>
+          <input type="tel" id="f_telefone" placeholder="Ex.: (13) 99999-0000" />
+        </div>
+        <div class="field">
+          <label>Data da reserva</label>
+          <input type="date" id="f_dataReserva" required />
+        </div>
+        <div class="field">
+          <label>Limite de hóspedes</label>
+          <input type="number" min="1" step="1" id="f_limiteHospedes" placeholder="Ex.: 6" value="1" required />
+        </div>
+        <div class="field">
+          <label>Check-in (data)</label>
+          <input type="date" id="f_checkin" required />
+        </div>
+        <div class="field">
+          <label>Check-in (horário)</label>
+          <input type="time" id="f_checkinHora" value="14:00" required />
+        </div>
+        <div class="field">
+          <label>Check-out (data)</label>
+          <input type="date" id="f_checkout" required />
+        </div>
+        <div class="field">
+          <label>Check-out (horário)</label>
+          <input type="time" id="f_checkoutHora" value="11:00" required />
+        </div>
+        <div class="field full">
+          <div class="err-text" id="dateError"></div>
+        </div>
+        <div class="field">
+          <label>Valor do aluguel (R$)</label>
+          <input type="number" min="0" step="0.01" id="f_valorAluguel" placeholder="0,00" required />
+        </div>
+        <div class="field">
+          <label>Valor do sinal (R$)</label>
+          <input type="number" min="0" step="0.01" id="f_valorSinal" placeholder="0,00" value="0" />
+        </div>
+        <div class="field full">
+          <label>Status financeiro</label>
+          <select id="f_status">
+            <option value="pendente">Sinal pendente</option>
+            <option value="recebido">Sinal recebido</option>
+            <option value="pago">Pago</option>
+            <option value="nao_pago">Não pago</option>
+          </select>
+        </div>
+        <div class="calc-box">
+          <div class="calc-item"><div class="l">Valor recebido</div><div class="v" id="calcRecebido">R$ 0,00</div></div>
+          <div class="calc-item"><div class="l">Total a receber</div><div class="v" id="calcAReceber">R$ 0,00</div></div>
+          <div class="calc-item"><div class="l">Saldo restante</div><div class="v" id="calcSaldo">R$ 0,00</div></div>
+          <div class="calc-item"><div class="l">Status</div><div class="v" id="calcStatus">—</div></div>
+        </div>
+        <div class="field full">
+          <label>Observações</label>
+          <textarea id="f_obs" placeholder="Notas adicionais sobre a reserva..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" id="cancelFormBtn">Cancelar</button>
+        <button type="submit" class="btn btn-primary" id="saveResBtn">Salvar reserva</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="overlay" id="detailOverlay">
+  <div class="modal" id="detailModal"></div>
+</div>
+
+<div class="overlay" id="settingsOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h2>Configurações do imóvel</h2>
+      <button class="modal-close" id="closeSettingsBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <p class="sub">Essas informações são fixas e usadas na geração dos contratos.</p>
+    <form id="settingsForm">
+      <div class="form-grid">
+        <div class="field full">
+          <label>Endereço completo do apartamento</label>
+          <textarea id="s_endereco" placeholder="Ex.: Av. Beira Mar, 123, Apto 501, Bairro, Cidade - UF, CEP 00000-000"></textarea>
+        </div>
+        <div class="field full">
+          <label>Nome do locador / responsável (aparece no contrato)</label>
+          <input type="text" id="s_locador" placeholder="Ex.: João da Silva" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" id="cancelSettingsBtn">Cancelar</button>
+        <button type="submit" class="btn btn-primary" id="saveSettingsBtn">Salvar configurações</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="toast-wrap"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
