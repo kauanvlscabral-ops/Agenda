@@ -4,8 +4,8 @@
 const { STATUS_LIST, STATUS_LABELS, STATUS_CSS, computeFinance } = window.MareFinance;
 
 /* ===================== API ===================== */
-const API_BASE = 'http://localhost:3000/api/reservas';
-const CONFIG_BASE = 'http://localhost:3000/api/config';
+const API_BASE = 'https://agenda-tf5y.onrender.com/api/reservas';
+const CONFIG_BASE = 'https://agenda-tf5y.onrender.com/api/config';
 let reservations = [];
 let appConfig = { enderecoImovel: '', nomeLocador: '' };
 
