@@ -8,7 +8,7 @@ const reservasRouter = require('./routes/reservas');
 const configRouter = require('./routes/config');
 
 const app = express();
-const PORT = process.env.DB_PORTDB_PORT;
+const PORT = process.env.DB_PORT;
 
 app.use(cors());
 app.use(express.json());
@@ -32,3 +32,7 @@ app.get('/', (req, res) => {
     console.error('❌ Erro ao conectar:', err);
   }
 })();
+
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Servidor rodando na porta ${PORT}`);
+});
