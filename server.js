@@ -33,6 +33,25 @@ app.get('/', (req, res) => {
   }
 })();
 
+app.get('/api/ping', async (req, res) => {
+  let conn;
+
+  try {
+    conn = await pool.getConnection();
+    await conn.query('SELECT 1');
+
+    res.json({
+      ok: true,
+      time: new Date().toISOString()
+    });
+  } catch (err) {
+    console.error('❌ Erro no ping:', err);
+    res.status(500).json({ ok: false });
+  } finally {
+    if (conn) conn.release();
+  }
+});
+
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Servidor rodando na porta ${PORT}`);
 });

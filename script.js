@@ -45,6 +45,28 @@ async function loadConfig(){
   }
 }
 
+// Mantém o banco ativo a cada 10 minutos
+async function manterBancoAtivo() {
+  try {
+    const resposta = await fetch("/api/ping", {
+      method: "GET",
+      cache: "no-store"
+    });
+
+    if (resposta.ok) {
+      console.log("💓 Banco mantido ativo");
+    }
+  } catch (erro) {
+    console.log("Heartbeat falhou:", erro.message);
+  }
+}
+
+// Envia um ping a cada 10 minutos
+setInterval(manterBancoAtivo, 10 * 60 * 1000);
+
+// Também envia um ping 30 segundos após abrir a página
+setTimeout(manterBancoAtivo, 30 * 1000);
+
 // Preenche valores padrão para reservas antigas (compatibilidade)
 function normalize(r){
   const status = STATUS_LIST.indexOf(r.status) !== -1 ? r.status : (r.sinalRecebido === 'sim' ? 'recebido' : 'pendente');
