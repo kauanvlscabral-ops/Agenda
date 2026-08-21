@@ -8,7 +8,7 @@ const reservasRouter = require('./routes/reservas');
 const configRouter = require('./routes/config');
 
 const app = express();
-const PORT = process.env.DB_PORT;
+const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
@@ -36,3 +36,6 @@ app.get('/', (req, res) => {
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Servidor rodando na porta ${PORT}`);
 });
+
+console.log("PORT do Render:", process.env.PORT);
+console.log("DB_PORT do banco:", process.env.DB_PORT);
